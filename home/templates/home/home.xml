@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<Root>
+    <Feeders>
+        {% for feeder in feeders %}
+            <Feeder>
+                <Title>{{ feeder.title }}</Title>
+                <Link>{{ feeder.link }}</Link>
+                <ItemNumber>{{ feeder.item_number }}</ItemNumber>
+                <Score>{{ feeder.score }}</Score>
+            </Feeder>
+        {% endfor %}
+    </Feeders>
+    <Items>
+        {% for item in items %}
+            <Item>
+                <Title>{{ item.title }}</Title>
+                <Link>{{ item.link }}</Link>
+                <TotalScore>{{ item.score }}</TotalScore>
+                <PositiveScore>{{ item.positive_score }}</PositiveScore>
+                <NegativeScore>{{ item.negative_score }}</NegativeScore>
+            </Item>
+        {% endfor %}
+    </Items>
+</Root>

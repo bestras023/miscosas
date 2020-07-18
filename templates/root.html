@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title> MisCosas </title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
+    <!-- Favicons -->
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'images/favicon.jpg' %}"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/font-awesome.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/animate.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/ti-icons/css/themify-icons.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body id="body">
+<header id="header">
+    <div class="container-fluid">
+
+        <div id="logo" class="pull-left">
+            <img src="{% static 'images/banner.jpg' %}"
+                 alt="">
+            <div class="d-inline-flex">
+                <span>MisCosas</span>
+            </div>
+        </div>
+
+        <nav id="nav-menu-container">
+            <ul class="nav-menu">
+                {% if request.session.id %}
+                    <li class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" id="profileDropdown">
+                            {% if request.session.photo_url == 'images/default.png' %}
+                                <img src="{% static request.session.photo_url %}" alt="">
+                            {% else %}
+                                <img src="{{ request.session.photo_url }}" alt="">
+                            {% endif %}
+                        </a>
+                        <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+                            <a class="dropdown-item" href="{% url 'home:user' request.session.id %}">
+                                <i class="ti-user text-secondary mr-2"></i>Profile
+                            </a>
+                            <a class="dropdown-item" href="{% url 'accounts:log_out' %}">
+                                <i class="ti-power-off text-secondary mr-2"></i>Logout
+                            </a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="dropdown">
+                        <a href="{% url 'accounts:log_in' %}">
+                            <button class="btn btn-sm btn-outline-light px-4 py-1">
+                                Sign in
+                            </button>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+<main id="main">
+    <div id="menu">
+        <div class="container-fluid py-3">
+            <div class="row">
+                <div class="col-6">
+                    <div class="row">
+                        <div class="col-9">
+                            <p id="current-menu" class="text-capitalize">
+                                {{ current_menu }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="row">
+                        <div class="{% if request.session.id %}
+                        col-3
+                        {% else %}
+                        col-4
+                        {% endif %}"></div>
+                        <div class="{% if request.session.id %}
+                        col-9
+                        {% else %}
+                        col-8
+                        {% endif %}">
+                            <ul id="subnav">
+                                <li>
+                                    <a href="{% url 'home:home' %}">
+                                        Home
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'home:feeders' %}">
+                                        Feeders
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'home:items' %}">
+                                        Items
+                                    </a>
+                                </li>
+                                {% if request.session.id %}
+                                    <li>
+                                        <a href="{% url 'home:users' %}">
+                                            Users
+                                        </a>
+                                    </li>
+                                {% endif %}
+                                <li>
+                                    <a href="{% url 'home:info' %}">
+                                        Information
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="main-content">
+        <div class="col-12 px-0">
+            <div class="col-11 mx-auto my-5">
+                {% block content %}
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+</main>
+<footer class="text-secondary">
+    This application uses data provided by Youtube Channel and Subreddit.
+</footer>
+
+<!-- JavaScript Libraries -->
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/jquery-migrate.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/easing.min.js' %}"></script>
+<script src="{% static 'js/hoverIntent.js' %}"></script>
+<script src="{% static 'js/superfish.min.js' %}"></script>
+<script src="{% static 'js/wow.min.js' %}"></script>
+<script src="{% static 'js/waypoints.min.js' %}"></script>
+<script src="{% static 'js/counterup.min.js' %}"></script>
+<script src="{% static 'js/owl.carousel.min.js' %}"></script>
+<script src="{% static 'js/isotope.pkgd.min.js' %}"></script>
+<script src="{% static 'js/lightbox.min.js' %}"></script>
+<script src="{% static 'js/jquery.touchSwipe.min.js' %}"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+<script id="csrf_token">
+    {# getting csrf token #}
+    $.ajaxSetup({
+        beforeSend: function (xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", "{{csrf_token}}");
+            }
+        }
+    });
+
+    function perform_style() {
+        document.getElementById("body").style.backgroundColor = '{{ request.session.style }}' === 'dark' ? "rgba(95, 95, 95, 0.3)" : "";
+    }
+
+    function perform_font_size() {
+        document.getElementById("body").style.fontSize = '{{ request.session.font_size }}';
+    }
+
+    perform_style();
+    perform_font_size();
+
+    function hide_feeder(feeder_id) {
+        if (confirm("Are you sure?")) {
+            $.ajax(
+                {
+                    url: '{% url 'home:home' %}',
+                    method: 'POST',
+                    data: {
+                        flag: 'hide_feeder',
+                        feeder_id: feeder_id
+                    },
+                    success: function (result) {
+                        return result['result'];
+                    }
+                }
+            );
+        } else {
+            return 'cancelled';
+        }
+    }
+
+    function show_feeder(feeder_id) {
+        if (confirm("Are you sure?")) {
+            $.ajax(
+                {
+                    url: '{% url 'home:home' %}',
+                    method: 'POST',
+                    data: {
+                        flag: 'show_feeder',
+                        feeder_id: feeder_id
+                    },
+                    success: function (result) {
+                        return result['result'];
+                    }
+                }
+            );
+        } else {
+            return 'cancelled';
+        }
+    }
+
+</script>
+{% block javascript %}
+{% endblock %}
+</body>
+</html>

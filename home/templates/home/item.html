@@ -1,0 +1,205 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-6">
+            <h4 class="text-secondary">Item Data</h4>
+            <p><b>Item Title</b>: {{ selected_item.title }}</p>
+            <p><b>Item Link</b>: <a href="{{ selected_item.link }}" target="_blank">{{ selected_item.link }}</a></p>
+            <p><b>Item Description</b>: {{ selected_item.description | safe }}</p>
+            {% if selected_item.embedded %}
+                <p><b>Embedded Video</b>: {{ selected_item.embedded }}</p>
+            {% endif %}
+        </div>
+        <div class="col-6">
+            <h4 class="text-secondary">Feeder Data</h4>
+            <p><b>Feeder Title</b>: <a href="#">{{ selected_item.feed.title }}</a></p>
+            <p><b>Feeder Link</b>: <a href="{{ selected_item.feed.link }}"
+                                      target="_blank">{{ selected_item.feed.link }}</a>
+            </p>
+        </div>
+    </div>
+    {% if request.session.id %}
+        <div class="row mb-3">
+            <div class="col-7">
+                <h5>Vote Action <small id="voted_display" class="text-info">{% if voted_status %}
+                    Already voted
+                {% endif %}</small></h5>
+                <div class="row">
+                    <div class="col-6">
+                        <button id="positive_btn" class="btn btn-outline-success" {% if voted_status %}
+                                disabled title="Already voted"
+                        {% endif %} onclick="handle_vote('positive', '{{ selected_item.id }}')">Positive Vote
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button id="negative_btn" class="btn btn-outline-secondary" {% if voted_status %}
+                                disabled title="Already voted"
+                        {% endif %} onclick="handle_vote('negative', '{{ selected_item.id }}')">Negative Vote
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-5">
+                <h5>Comment Action <small id="commented_display" class="text-info">{% if commented_status %}
+                    Already commented
+                {% endif %}</small></h5>
+                <button id="comment_btn" class="btn btn-outline-primary" {% if commented_status %}
+                        disabled
+                {% endif %} onclick="open_comment('{{ selected_item.id }}')">Put a comment
+                </button>
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-12">
+            {% if comments %}
+                <table id="comments_tb" class="table table-bordered">
+                    <colgroup>
+                        <col span="1" style="width: 30%">
+                        <col span="1" style="width: 40%;">
+                        <col span="1" style="width: 30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Creator</th>
+                        <th>Text</th>
+                        <th>Date</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for comment in comments %}
+                        <tr>
+                            <td>{{ comment.creator }}</td>
+                            <td><button class="btn btn-outline-secondary btn-sm" onclick="show_comment('{{ comment.description | escapejs }}')"><i class="ti-view-grid text-info"></i></button></td>
+                            <td>{{ comment.createdAt | date:"D d M Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h3 class="text-secondary">There are no comments now.</h3>
+            {% endif %}
+        </div>
+    </div>
+    <div class="modal fade" id="comment_modal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title text-info">Comment</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <h5>Item Title: <br><span class="auto_break">{{ selected_item.title }}</span></h5>
+                    <h5>Item Link: <br><span class="auto_break">{{ selected_item.link }}</span></h5>
+                    <div class="form-group">
+                        <label for="comment">Enter a comment <small id="validation_comment"
+                                                                    class="text-info"></small></label><br>
+                        <textarea id="comment_text" cols="50" rows="6" maxlength="255"></textarea>
+                    </div>
+                    <button class="btn btn-outline-info" onclick="handle_comment()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="show_comment_modal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title text-info">Comment Text</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <span class="auto_break" id="comment_text_modal"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        $(document).ready(function () {
+            $('#comments_tb').DataTable(
+                {
+                    "order": [[2, "desc"]]
+                }
+            );
+        });
+
+        function handle_vote(kind, item_id) {
+            if (confirm("Are you sure?")) {
+                $.ajax(
+                    {
+                        url: '/items/' + parseInt(item_id) + '/',
+                        method: 'POST',
+                        data: {
+                            flag: 'vote',
+                            kind: kind
+                        },
+                        success: function (result) {
+                            const res = result['result'];
+                            if (res === 'ok') {
+                                document.getElementById("positive_btn").setAttribute('disabled', 'true');
+                                document.getElementById("positive_btn").setAttribute('title', 'Already voted');
+                                document.getElementById("negative_btn").setAttribute('disabled', 'true');
+                                document.getElementById("negative_btn").setAttribute('title', 'Already voted');
+                                document.getElementById("voted_display").innerText = "Already voted";
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        function open_comment() {
+            $("#comment_modal").modal('show');
+        }
+
+        function handle_comment() {
+            const text = document.getElementById("comment_text").value;
+            if (text.length < 30) {
+                document.getElementById("validation_comment").innerText = "At least enter 30 characters.";
+                return;
+            }
+            const item_id = '{{ selected_item.id }}';
+            if (confirm("Are you sure?")) {
+                $.ajax(
+                    {
+                        url: "/items/" + parseInt(item_id) + "/",
+                        method: 'POST',
+                        data: {
+                            flag: 'comment',
+                            text: text
+                        },
+                        success: function (result) {
+                            const res = result['result'];
+                            if (res === 'ok') {
+                                $("#comment_modal").modal('hide');
+                                document.getElementById("comment_btn").setAttribute('disabled', 'true');
+                                document.getElementById("comment_btn").setAttribute('title', 'Already commented');
+                                document.getElementById("commented_display").innerText = "Already commented";
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        function show_comment(text) {
+            document.getElementById("comment_text_modal").innerText = text;
+            $("#show_comment_modal").modal('show');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-info">Public User Data</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <h5>Name: {{ current_user.username }}</h5>
+        </div>
+        {% if current_user.id == request.session.id %}
+            <div class="col-6">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    Change a photo: <input type="file" name="photo" id="photo" required>
+                    <button class="btn btn-sm btn-outline-primary">Submit</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <h4 class="text-info">Change Page Appearance</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-6">
+            <label>Style</label>
+            <select name="style" id="style" class="form-control" onchange="change_style()">
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+            </select>
+        </div>
+        <div class="col-6">
+            <label>Font Size</label>
+            <select name="font_size" id="font_size" class="form-control" onchange="change_font_size()">
+                <option value="0.75rem">Small</option>
+                <option value="1rem">Normal</option>
+                <option value="1.25rem">Large</option>
+            </select>
+        </div>
+    </div>
+    <br>
+    <h4 class="text-info">List of voted items</h4>
+    <div class="row">
+        <div class="col-12">
+            {% if voted_items %}
+                <table id="list_voted_items" class="table  table-bordered">
+                    <colgroup>
+                        <col span="1" style="width: 50%;">
+                        <col span="1" style="width: 50%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Link</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in voted_items %}
+                        <tr>
+                            <td><a href="{% url 'home:item' item.id %}">{{ item.title }}</a></td>
+                            <td><a href="{{ item.link }}" target="_blank">{{ item.link }}</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>There are no voted items.</p>
+            {% endif %}
+        </div>
+    </div>
+    <h4 class="text-info">List of commented items</h4>
+    <div class="row">
+        <div class="col-12">
+            {% if commented_items %}
+                <table id="list_commented_items" class="table table-bordered">
+                    <colgroup>
+                        <col span="1" style="width: 35%;">
+                        <col span="1" style="width: 35%;">
+                        <col span="1" style="width: 30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Link</th>
+                        <th>Comment</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in commented_items %}
+                        <tr>
+                            <td><a href="{% url 'home:item' item.id %}">{{ item.commented_item.title }}</a></td>
+                            <td><a href="{{ item.commented_item.link }}"
+                                   target="_blank">{{ item.commented_item.link }}</a></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-info"
+                                        onclick="comment_handle('{{ item.description | escapejs }}')">Click to view
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>There are no commented items.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="modal fade" id="comment_modal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title text-info">Comment Text</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <span class="auto_break" id="comment_text"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        function comment_handle(text) {
+            document.getElementById("comment_text").innerText = text;
+            $("#comment_modal").modal('show');
+        }
+
+        document.getElementById("style").value = '{{ request.session.style }}';
+        document.getElementById("font_size").value = '{{ request.session.font_size }}';
+
+        function change_style() {
+            $.ajax(
+                {
+                    url: '/users/' + "{{ user_id }}" + "/",
+                    method: 'POST',
+                    data: {
+                        flag: 'style'
+                    },
+                    success: function (result) {
+                        const res = result['result'];
+                        if (res === 'ok') {
+                            window.location.reload();
+                        }
+                    }
+                }
+            )
+        }
+
+        function change_font_size() {
+            const font_size = document.getElementById("font_size").value;
+            $.ajax(
+                {
+                    url: '/users/' + "{{ user_id }}" + "/",
+                    method: 'POST',
+                    data: {
+                        flag: 'font_size',
+                        font_size: font_size
+                    },
+                    success: function (result) {
+                        const res = result['result'];
+                        if (res === 'ok') {
+                            window.location.reload();
+                        }
+                    }
+                }
+            )
+        }
+    </script>
+{% endblock %}

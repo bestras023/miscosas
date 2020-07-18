@@ -1,0 +1,47 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+{% block content %}
+    {% if item_list %}
+        <div class="row">
+            <div class="col-12">
+                <table id="items_tb" class="table table-bordered">
+                    <colgroup>
+                        <col span="1" style="width: 50%">
+                        <col span="1" style="width: 50%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Link</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in item_list %}
+                        <tr>
+                            <td><a href="{% url 'home:item' item.id %}">{{ item.title }}</a></td>
+                            <td><a href="{{ item.link }}" target="_blank">{{ item.link }}</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <h3 class="text-secondary">There are no items to display.</h3>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
+{% block javascript %}
+    <script>
+        $(document).ready(function () {
+            $('#items_tb').DataTable(
+                {
+                    "order": [[0, "desc"]]
+                }
+            );
+        });
+    </script>
+{% endblock %}

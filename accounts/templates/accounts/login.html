@@ -1,0 +1,40 @@
+{% extends 'accounts.html' %}
+{% load static %}
+{% block content %}
+    <div class="wrapper">
+        <div id="close">
+            <a href="{% url 'home:home' %}">
+                <img src="{% static 'images/close.svg' %}" alt="close">
+            </a>
+        </div>
+        <div class="inner">
+            <form action="" method="post">
+                {% csrf_token %}
+                <h3 class="mb-5">Log In</h3>
+                <div id="display_result_login"></div>
+                <div class="form-wrapper mb-3">
+                    <label for="username">Username</label>
+                    <input type="text" value="{{ username }}" name="username" class="form-control" required>
+                </div>
+                <div class="form-wrapper mb-5">
+                    <label for="psw">Password</label>
+                    <input type="password" value="{{ psw }}" name="psw" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary w-100 mb-3">
+                    Login
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        const invalid = "{{ invalid }}";
+        const display_result_login = document.getElementById("display_result_login");
+        if (invalid === "username") {
+            display_result_login.innerHTML = "<b class='text-warning'>Invalid Username</b>";
+        } else if (invalid === "psw") {
+            display_result_login.innerHTML = "<b class='text-warning'>Invalid Password</b>";
+        }
+    </script>
+{% endblock %}

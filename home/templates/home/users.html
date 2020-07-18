@@ -1,0 +1,57 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+{% block content %}
+    <h4 class="text-info">User List</h4>
+    <div class="row">
+        <div class="col-12">
+            {% if profile_list %}
+                <table id="profiles_tb" class="table table-bordered">
+                    <colgroup>
+                        <col span="1" style="width: 40%;">
+                        <col span="1" style="width: 30%;">
+                        <col span="1" style="width: 30%;">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Photo Url</th>
+                        <th>Voted Items Number</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for profile in profile_list %}
+                        <tr>
+                            <td><a href="{% url 'home:user' profile.user_id %}">{{ profile.username }}</a></td>
+                            <td>
+                                {% if profile.photo %}
+                                    <a href="{{ profile.photo.url }}" target="_blank">{{ profile.photo }}</a>
+                                {% else %}
+                                    <a href="/static/images/default.png" target="_blank">default.png</a>
+                                {% endif %}
+                            </td>
+                            <td>{{ profile.voted_item_number }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>There are no users.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        $(document).ready(function () {
+            $('#profiles_tb').DataTable(
+                {
+                    "order": [[0, "desc"]]
+                }
+            );
+        });
+    </script>
+{% endblock %}

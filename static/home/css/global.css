@@ -1,0 +1,110 @@
+#subnav {
+    list-style: none;
+}
+
+#subnav > li {
+    float: left;
+    margin: 0 2rem;
+    padding: 3px 7px;
+    width: 30px;
+    height: 30px;
+}
+
+#menu {
+    background-color: rgba(124, 189, 201, 1);
+    height: 50px;
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 70px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100 !important;
+}
+
+#menu > div {
+    max-height: 60px;
+}
+
+#main {
+    margin-top: 70px;
+}
+
+#main-content {
+    padding-top: 30px;
+}
+
+p#current-menu {
+    margin-left: 3rem;
+}
+
+span#url_validation {
+    color: red;
+}
+
+#feeder_tb tbody tr td, #feeder_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#items_10 tbody tr td, #items_10 thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#home_feeders_tb tbody tr td, #home_feeders_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#feeders_tb tbody tr td, #feeders_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#feeder_items_tb tbody tr td, #feeder_items_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#items_tb tbody tr td, #items_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+.auto_break {
+    word-break: break-all;
+}
+
+#comments_tb tbody tr td, #comments_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#profiles_tb tbody tr td, #profiles_tb thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#list_voted_items tbody tr td, #list_voted_items thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}
+
+#list_commented_items tbody tr td, #list_commented_items thead tr th {
+    padding: 3px;
+    text-align: center;
+    vertical-align: center;
+}

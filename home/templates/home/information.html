@@ -1,0 +1,44 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+{% block content %}
+    <h4 class="text-info">A brief Information</h4>
+    <p class="auto_break">
+        This application uses data provided by Youtube Channel and Subreddit.
+        There are mainly 5 pages-Home page, Feeders page, Items page, Users page, Information page
+    </p>
+    <h5 class="text-info">1. Home page</h5>
+    <p>
+        In this page, it displays the 10 items with the most score on the site.
+        You can see it and go to its page for each item.
+        <b>
+            The most important action on this page is that you can choose the feeder via feeder form.</b>
+    </p>
+    <h5 class="text-info">2. Feeders page</h5>
+    <p>
+        In this page, it shows the list of feeders chosen via Feeder Form on the home page.
+        Here, you can see how many items are for each feeder and total score(positive score minus negative score).
+        Also you can go to the items page of each feeder.
+    </p>
+    <h5 class="text-info">3. Items page</h5>
+    <p>
+        It shows all the items on the site.
+        You can click the item title to go to the item page.
+        On the item page, you can perform two actions only if you are logged in.
+        Vote action and Comment action.
+    </p>
+    <h5 class="text-info">4. Users page</h5>
+    <p>
+        This page is only visible when you are logged in.
+        Here, you can see the list of registered users and go to the user page.
+        In the user page, you can see the list of items voted and commented in the past.
+        If you are in your user page, you are able to change the photo as your favourite.
+    </p>
+    <h5 class="text-info">5. Information page</h5>
+    <p>
+        Here, it describes a brief instructions of the site.
+    </p>
+{% endblock %}

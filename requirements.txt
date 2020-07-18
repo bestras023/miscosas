@@ -1,0 +1,5 @@
+djangorestframework
+Django==3.0.6
+feedparser==5.2.1
+Pillow==7.1.2
+requests==2.23.0

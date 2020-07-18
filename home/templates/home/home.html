@@ -1,0 +1,241 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-9">
+            <h2 class="text-success">
+                10 Items with the most score
+                <span id="xml_format"></span>
+            </h2>
+            <table id="items_10" class="table-bordered">
+                <colgroup>
+                    <col span="1" style="width: 40%;">
+                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 10%;">
+                    <col span="1" style="width: 10%;">
+                    <col span="1" style="width: 10%;">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Link</th>
+                    <th>Total Score</th>
+                    <th>Positive Score</th>
+                    <th>Negative Score</th>
+                </tr>
+                </thead>
+                <tbody id="items_10_tbody">
+                </tbody>
+            </table>
+            <h3 class="text-secondary" id="empty_items_10"></h3>
+            <br>
+            <h2 class="text-success">
+                Feeder List
+            </h2>
+            <table id="home_feeders_tb" class="table-bordered">
+                <colgroup>
+                    <col span="1" style="width: 20%;">
+                    <col span="1" style="width: 40%;">
+                    <col span="1" style="width: 15%;">
+                    <col span="1" style="width: 15%;">
+                    <col span="1" style="width: 10%;">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Link</th>
+                    <th>Number of Items</th>
+                    <th>Total Score</th>
+                    <th>Delete</th>
+                </tr>
+                </thead>
+                <tbody id="home_feeders_tb_tbody">
+            </table>
+            <h3 class="text-secondary" id="empty_home_feeders"></h3>
+            <br>
+        </div>
+        <div class="col-3">
+            <h3 class="text-primary">Feeder Form</h3>
+            <span id="handle_res"></span>
+            <div class="form-group">
+                <label for="feeder">Select a feeder</label>
+                <select name="feeder" id="feeder" class="form-control" required>
+                    <option value="Youtube">Youtube</option>
+                    <option value="Reddit">Reddit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="feed">Enter a valid url <span id="url_validation"></span></label><br>
+                <small>
+                    Example: <br>
+                    https://www.youtube.com/channel/UCJl1YajcPWTeJNsQhGyMIMg
+                    https://www.reddit.com/r/news
+                </small>
+                <textarea class="form-control" name="url" id="url" rows="3"></textarea>
+            </div>
+            <div class="text-center">
+                <button id="feed_btn" type="button" class="w-100 btn btn-outline-primary">
+                    Submit
+                    <img id="feed_loader" src="{% static 'images/ajax-loader.gif' %}" alt="">
+                </button>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script>
+        function validURL(url) {
+            const expression =
+                /[-a-zA-Z0-9@:%_+.~#?&/=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_+.~#?&/=]*)?/gi;
+            const regex = new RegExp(expression);
+            return url.match(regex);
+        }
+        function validFeederURL(url) {
+            return url.includes('https://www.youtube.com/channel/') || url.includes('https://www.reddit.com/r/');
+        }
+        document.getElementById("feed_loader").style.display = 'none';
+        document.getElementById("feed_btn").addEventListener("click", function () {
+            document.getElementById("handle_res").innerHTML = '';
+            let url = document.getElementById("url").value;
+            if (url === "") {
+                document.getElementById("url_validation").innerHTML = "Required";
+                return;
+            }
+            document.getElementById("url_validation").innerHTML = "";
+            if (!validURL(url)) {
+                document.getElementById("url_validation").innerHTML = "Invalid url";
+                return;
+            }
+            if (!validFeederURL(url)) {
+                document.getElementById("url_validation").innerHTML = "Invalid url";
+                return;
+            }
+            document.getElementById("url_validation").innerHTML = "";
+            url = url.split("/");
+            url = url[url.length - 1];
+            if (confirm("Are you sure?")) {
+                document.getElementById("feed_loader").style.display = 'inline-block';
+                document.getElementById("feed_btn").disabled = true;
+                const feeder = document.getElementById("feeder").value;
+
+                $.ajax(
+                    {
+                        url: '{% url 'home:home' %}',
+                        method: 'POST',
+                        data: {
+                            flag: 'create_feeder',
+                            feeder: feeder,
+                            url: url
+                        },
+                        success: function (result) {
+                            document.getElementById("feed_loader").style.display = 'none';
+                            document.getElementById("feed_btn").disabled = false;
+                            const res = result['result'];
+                            if (res === 200) {
+                                document.getElementById("handle_res").innerHTML = '<span class="text-success">Success</span>';
+                                get_feeders();
+                                get_10_items();
+                            } else if (res === 404) {
+                                document.getElementById("handle_res").innerHTML = '<span class="text-error">Not Found. Invalid Identifier!!!</span>';
+                            } else if (res === "exist") {
+                                document.getElementById("handle_res").innerHTML = '<span class="text-warning">Already Exist.</span>';
+                            }
+                        }
+                    }
+                )
+            }
+        });
+        function get_feeders() {
+            $.ajax(
+                {
+                    url: '{% url 'home:home' %}',
+                    method: 'POST',
+                    data: {
+                        flag: 'get_feeders'
+                    },
+                    success: function (result) {
+                        const feeder_values = result['feeder_values'];
+                        if (feeder_values === 'empty') {
+                            document.getElementById("home_feeders_tb").style.display = 'none';
+                            document.getElementById("empty_home_feeders").innerHTML = 'There are no feeders to display.';
+                        } else {
+                            document.getElementById("home_feeders_tb").style.display = 'block';
+                            document.getElementById("empty_home_feeders").innerHTML = '';
+                            let tbody = '';
+                            for (let feeder of feeder_values) {
+                                let tr = '<tr>';
+                                const feeder_id = feeder['id'];
+                                const feeder_title = feeder['title'];
+                                const feeder_link = feeder['link'];
+                                const feeder_item_number = feeder['item_number'];
+                                const feeder_score = feeder['score'];
+                                tr += `<td><a href='/feeders/${feeder_id}'>${feeder_title}</a></td>`;
+                                tr += `<td><a href='${feeder_link}' target='_blank'>${feeder_link}</a></td>`;
+                                tr += `<td>${feeder_item_number}</td>`;
+                                tr += `<td>${feeder_score}</td>`;
+                                tr += `<td><button class='btn btn-sm btn-outline-secondary' onclick='call_hide_feeder(${feeder_id})'>Click me</button></td>`;
+                                tr += '</tr>';
+                                tbody += tr;
+                            }
+                            document.getElementById("home_feeders_tb_tbody").innerHTML = tbody;
+                        }
+                    }
+                }
+            )
+        }
+        get_feeders();
+        function get_10_items() {
+            $.ajax(
+                {
+                    url: '{% url 'home:home' %}',
+                    method: 'POST',
+                    data: {
+                        flag: 'get_10_items'
+                    },
+                    success: function (result) {
+                        const items_10 = result['items_10'];
+                        if (items_10 === 'empty') {
+                            document.getElementById("items_10").style.display = 'none';
+                            document.getElementById("empty_items_10").innerHTML = 'There are no items to display.';
+                        } else {
+                            document.getElementById("items_10").style.display = 'block';
+                            document.getElementById("empty_items_10").innerHTML = '';
+                            document.getElementById("xml_format").innerHTML = `<a href='{% url 'home:home_xml' %}' target='_blank'><button class='btn btn-sm btn-outline-success'>XML Format</button></a>`;
+                            let tbody = '';
+                            for (let item of items_10) {
+                                let tr = '<tr>';
+                                const item_id = item['id'];
+                                const item_title = item['title'];
+                                const item_link = item['link'];
+                                const item_score = item['score'];
+                                const item_positive_score = item['positive_score'];
+                                const item_negative_score = item['negative_score'];
+                                tr += `<td><a href='/item/${item_id}'>${item_title}</a></td>`;
+                                tr += `<td><a href='${item_link}' target='_blank'>${item_link}</a></td>`;
+                                tr += `<td>${item_score}</td>`;
+                                tr += `<td>${item_positive_score}</td>`;
+                                tr += `<td>${item_negative_score}</td>`;
+                                tr += '</tr>';
+                                tbody += tr;
+                            }
+                            document.getElementById("items_10_tbody").innerHTML = tbody;
+                        }
+                    }
+                }
+            )
+        }
+        get_10_items();
+        function call_hide_feeder(feeder_id) {
+            const res = hide_feeder(feeder_id);
+            if (res !== 'cancelled') {
+                get_feeders();
+            }
+        }
+    </script>
+{% endblock %}
+

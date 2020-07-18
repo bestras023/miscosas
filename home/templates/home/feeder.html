@@ -1,0 +1,133 @@
+{% extends 'root.html' %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="{% static 'home/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'home/css/global.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <h4 class="text-secondary">Feeder Title: {{ feed_title }}</h4>
+        </div>
+        <div class="col-md-12">
+            <h4 class="text-secondary">Feeder Link: <a href="{{ feed_link }}"
+                                                       target="_blank">{{ feed_link }}</a></h4>
+        </div>
+        <div class="col-md-12">
+            <button id="hide_feeder_btn" class="btn btn-outline-secondary {% if not feed_visible_status %}
+            disabled
+            {% endif %}" {% if feed_visible_status %}
+                    onclick="hide_action('{{ feed_id }}')"
+            {% endif %}>Hide
+            </button>
+            <button id="show_feeder_btn" class="btn btn-outline-info {% if feed_visible_status %}
+            disabled
+            {% endif %}" {% if not feed_visible_status %}
+                    onclick="show_action('{{ feed_id }}')"
+            {% endif %}>Show
+            </button>
+        </div>
+        <br><br>
+        <div class="col-md-12">
+            <h5 class="text-success">Item List({{ number_of_items }})</h5>
+            <table id="feeder_items_tb" class="table-bordered">
+                <colgroup>
+                    <col span="1" style="width: 30%;">
+                    <col span="1" style="width: 45%;">
+                    <col span="1" style="width: 25%;">
+                </colgroup>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Link</th>
+                    <th>View Detail</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in item_feed %}
+                    <tr>
+                        <td><a href="{% url 'home:item' item.id %}">{{ item.title }}</a></td>
+                        <td><a href="{{ item.link }}" target="_blank">{{ item.link }}</a></td>
+                        <td>
+                            <button class="btn btn-primary btn-sm"
+                                    onclick="view_item('{{ item.title }}', '{{ item.link }}', '{{ item.description | escapejs }}', '{{ item.embedded }}')">
+                                <i class="ti-view-grid"></i></button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal fade" id="item_modal" role="dialog">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title text-info">Item detail</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <h4>Feeder Name: <br><span id="feed_title" class="auto_break"></span></h4>
+                    <h4>Feeder Link: <br><span id="feed_link" class="auto_break"></span></h4>
+                    <h5>Item Title: <br><span id="item_title" class="auto_break"></span></h5>
+                    <h5>Item Link: <br><span id="item_link" class="auto_break"></span></h5>
+                    <h5>Item Description: <br><span id="item_description" class="auto_break"></span></h5>
+                    <h5 id="embedded_video" class="auto_break"></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+    <script>
+        $('#feeder_items_tb').DataTable(
+            {
+                "order": [[0, "desc"]]
+            }
+        );
+
+        function view_item(item_title, item_link, item_description, item_embedded) {
+            document.getElementById("feed_title").innerText = "{{ feed_title }}";
+            document.getElementById("feed_link").innerHTML = "<a href='" + "{{ feed_link }}" + "' target='_blank'>" + "{{ feed_link }}" + "</a>";
+            document.getElementById("item_title").innerText = item_title;
+            document.getElementById("item_link").innerHTML = "<a href='" + "{{ feed_link }}" + "' target='_blank'>" + item_link + "</a>";
+            document.getElementById("item_description").innerHTML = item_description;
+            if (item_embedded !== "") {
+                document.getElementById("embedded_video").innerHTML = "Embedded Video: " + item_embedded;
+            }
+            $("#item_modal").modal('show');
+        }
+
+        const hide_feeder_btn = $("#hide_feeder_btn");
+        const show_feeder_btn = $("#show_feeder_btn");
+
+        function hide_action(feed_id) {
+            const res = hide_feeder(feed_id);
+            if (res !== 'cancelled') {
+                hide_feeder_btn.addClass('disabled');
+                hide_feeder_btn.removeAttr('onclick');
+                show_feeder_btn.removeClass('disabled');
+                show_feeder_btn.attr('onclick', `show_action('${feed_id}')`);
+            }
+        }
+
+        function show_action(feed_id) {
+            const res = show_feeder(feed_id);
+            if (res !== 'cancelled') {
+                show_feeder_btn.addClass('disabled');
+                show_feeder_btn.removeAttr('onclick');
+                hide_feeder_btn.removeClass('disabled');
+                hide_feeder_btn.attr('onclick', `hide_action('${feed_id}')`);
+            }
+        }
+
+    </script>
+{% endblock %}
+
